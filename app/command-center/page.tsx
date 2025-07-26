@@ -1,6 +1,8 @@
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import DateTimeLabel from "@/components/ui/date-time-label"
+import CursorTraceText from "@/components/ui/hover-text-effect"
 
 export default function CommandCenterPage() {
   return (
@@ -127,11 +129,16 @@ export default function CommandCenterPage() {
 
         {/* Encrypted Chat Activity */}
         <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
-              ENCRYPTED CHAT ACTIVITY
-            </CardTitle>
-          </CardHeader>
+            <CardHeader className="pb-3">
+              <div className="inline-flex gap-2">
+                <CardTitle className="text-sm font-medium text-neutral-700 tracking-wider">
+                  UN
+                </CardTitle>
+                <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+                  ENCRYPTED SOCIALS
+                </CardTitle>
+              </div>
+            </CardHeader>
           <CardContent className="flex flex-col items-center">
             {/* Wireframe Sphere */}
             <div className="relative w-32 h-32 mb-4">
@@ -147,16 +154,27 @@ export default function CommandCenterPage() {
               </div>
             </div>
 
-            <div className="text-xs text-neutral-500 space-y-1 w-full font-mono">
+            <div className="text-base text-neutral-500 space-y-1 w-full font-mono">
               <div className="flex justify-between">
-                <span># 2025-06-17 14:23 UTC</span>
+                <span>
+                <DateTimeLabel/>
+                </span>
               </div>
-              <div className="text-white">{"> [AGT:gh0stfire] ::: INIT >> ^^^ loading secure channel"}</div>
-              <div className="text-orange-500">{"> CH#2 | 1231.9082464.500...xR3"}</div>
-              <div className="text-white">{"> KEY LOCKED"}</div>
-              <div className="text-neutral-400">
-                {'> MSG >> "...mission override initiated... awaiting delta node clearance"'}
-              </div>
+              <a href="https://github.com/glebdubs" target="_blank" rel="noopener noreferrer">
+                <CursorTraceText className="block" text="GITHUB   : >> @glebdubs <<"/>
+              </a>
+              <br/>
+              <a href="https://leetcode.com/u/glebdubs/" target="_blank" rel="noopener noreferrer">
+                <CursorTraceText className="block text-white" text="LEETCODE : // @glebdubs"/>
+              </a>
+              <br/>
+              <a href="https://www.instagram.com/gleb.dubs/" target="_blank" rel="noopener noreferrer">
+                <CursorTraceText className="block text-orange-500" text="INSTA     : $$ @gleb.dubs"/>
+              </a>
+              
+              <a target="_blank" rel="noopener noreferrer">
+                <CursorTraceText className="block text-neutral-500" text="DISCORD  : ### @g.du"/>
+              </a>
             </div>
           </CardContent>
         </Card>
