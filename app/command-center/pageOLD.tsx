@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import DateTimeLabel from "@/components/ui/date-time-label"
 import CursorTraceText from "@/components/ui/hover-text-effect"
 
-// Types for the LeetCode API response
 interface LeetCodeStats {
   status: string
   message: string
@@ -25,7 +24,8 @@ interface LeetCodeStats {
 }
 
 export default function CommandCenterPage() {
-  // State for LeetCode stats
+
+    // State for LeetCode stats
   const [leetcodeStats, setLeetcodeStats] = useState<LeetCodeStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -64,144 +64,60 @@ export default function CommandCenterPage() {
   const formatHackerNumber = (num: number): string => {
     return num.toString().padStart(3, '0')
   }
-
   return (
     <div className="p-6 space-y-6">
       {/* Main Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* LeetCode Stats Overview */}
+        {/* Agent Status Overview */}
         <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
-                LEETCODE STATS
-              </CardTitle>
-              {isLoading && (
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-              )}
-              {error && (
-                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              )}
-              {!isLoading && !error && leetcodeStats && (
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              )}
-            </div>
+            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">LEETCODE STATS</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="text-center">
-                <div className="text-2xl font-bold text-white font-mono">
-                  {isLoading ? "---" : error ? "ERR" : formatHackerNumber(leetcodeStats?.totalSolved || 0)}
-                </div>
+                <div id="totalSolved" className="text-2xl font-bold text-white font-mono">190</div>
                 <div className="text-xs text-neutral-500">Problems Solved</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white font-mono">
-                  {isLoading ? "---" : error ? "ERR" : `${leetcodeStats?.acceptanceRate?.toFixed(1) || "0.0"}%`}
-                </div>
+                <div className="text-2xl font-bold text-white font-mono">990</div>
                 <div className="text-xs text-neutral-500">Acceptance Rate</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-white font-mono">
-                  {isLoading ? "---" : error ? "ERR" : leetcodeStats?.contributionPoints?.toLocaleString() || "0"}
-                </div>
-                <div className="text-xs text-neutral-500">Contribution Pts</div>
+                <div className="text-2xl font-bold text-white font-mono">290</div>
+                <div className="text-xs text-neutral-500">Ranking</div>
               </div>
             </div>
 
-            {/* Global Rank - Separate Row */}
-            <div className="border-l-2 border-orange-500 pl-3 bg-neutral-800 p-3 rounded mb-4">
-              <div className="text-xs text-neutral-300 font-mono mb-1">GLOBAL RANKING</div>
-              <div className="text-xl text-white font-mono">
-                {isLoading ? "Loading..." : error ? "Connection Failed" : `#${leetcodeStats?.ranking?.toLocaleString() || "0"}`}
-              </div>
-              <div className="text-xs text-neutral-500">
-                {!isLoading && !error && leetcodeStats && leetcodeStats.ranking > 0 ? 
-                  `Top ${((leetcodeStats.ranking / 4000000) * 100).toFixed(2)}% worldwide` : 
-                  "Rank unavailable"
-                }
-              </div>
-            </div>
-
-            {/* Difficulty Breakdown */}
-            <div className="space-y-2 mb-4">
-              <div className="text-xs text-neutral-300 font-medium tracking-wider mb-2">
-                DIFFICULTY BREAKDOWN
-              </div>
-              
-              {/* Easy Problems */}
-              <div className="flex items-center justify-between p-2 bg-neutral-800 rounded hover:bg-neutral-700 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                  <div>
-                    <div className="text-xs text-white font-mono">EASY</div>
-                    <div className="text-xs text-neutral-500">
-                      {isLoading ? "Loading..." : error ? "Error" : `${leetcodeStats?.easySolved || 0}/${leetcodeStats?.totalEasy || 0}`}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-sm font-mono text-white">
-                  {!isLoading && !error && leetcodeStats ? 
-                    `${((leetcodeStats.easySolved / leetcodeStats.totalEasy) * 100).toFixed(0)}%` : 
-                    "-%"
-                  }
-                </div>
-              </div>
-
-              {/* Medium Problems */}
-              <div className="flex items-center justify-between p-2 bg-neutral-800 rounded hover:bg-neutral-700 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-orange-500"></div>
-                  <div>
-                    <div className="text-xs text-white font-mono">MEDIUM</div>
-                    <div className="text-xs text-neutral-500">
-                      {isLoading ? "Loading..." : error ? "Error" : `${leetcodeStats?.mediumSolved || 0}/${leetcodeStats?.totalMedium || 0}`}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-sm font-mono text-white">
-                  {!isLoading && !error && leetcodeStats ? 
-                    `${((leetcodeStats.mediumSolved / leetcodeStats.totalMedium) * 100).toFixed(0)}%` : 
-                    "-%"
-                  }
-                </div>
-              </div>
-
-              {/* Hard Problems */}
-              <div className="flex items-center justify-between p-2 bg-neutral-800 rounded hover:bg-neutral-700 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                  <div>
-                    <div className="text-xs text-white font-mono">HARD</div>
-                    <div className="text-xs text-neutral-500">
-                      {isLoading ? "Loading..." : error ? "Error" : `${leetcodeStats?.hardSolved || 0}/${leetcodeStats?.totalHard || 0}`}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-sm font-mono text-white">
-                  {!isLoading && !error && leetcodeStats ? 
-                    `${((leetcodeStats.hardSolved / leetcodeStats.totalHard) * 100).toFixed(0)}%` : 
-                    "-%"
-                  }
-                </div>
-              </div>
-            </div>
-
-
-
-            {/* Error Display */}
-            {error && (
-              <div className="border-l-2 border-red-500 pl-3 bg-red-900/20 p-2 rounded">
-                <div className="text-xs text-red-400 font-mono">SYSTEM ERROR</div>
-                <div className="text-xs text-red-300">{error}</div>
-                <button 
-                  onClick={() => fetchLeetCodeStats(LEETCODE_USERNAME)}
-                  className="text-xs text-orange-500 hover:text-orange-400 mt-1 font-mono"
+            <div className="space-y-2">
+              {[
+                { id: "G-078W", name: "VENGEFUL SPIRIT", status: "active" },
+                { id: "G-079X", name: "OBSIDIAN SENTINEL", status: "standby" },
+                { id: "G-080Y", name: "GHOSTLY FURY", status: "active" },
+                { id: "G-081Z", name: "CURSED REVENANT", status: "compromised" },
+              ].map((agent) => (
+                <div
+                  key={agent.id}
+                  className="flex items-center justify-between p-2 bg-neutral-800 rounded hover:bg-neutral-700 transition-colors cursor-pointer"
                 >
-                  [RETRY_CONNECTION]
-                </button>
-              </div>
-            )}
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        agent.status === "active"
+                          ? "bg-white"
+                          : agent.status === "standby"
+                            ? "bg-neutral-500"
+                            : "bg-red-500"
+                      }`}
+                    ></div>
+                    <div>
+                      <div className="text-xs text-white font-mono">{agent.id}</div>
+                      <div className="text-xs text-neutral-500">{agent.name}</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
 
@@ -372,7 +288,7 @@ export default function CommandCenterPage() {
           </CardContent>
         </Card>
 
-        {/* Mission Information - Updated with LeetCode Data */}
+        {/* Mission Information */}
         <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">MISSION INFORMATION</CardTitle>
@@ -387,21 +303,15 @@ export default function CommandCenterPage() {
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs">
                     <span className="text-neutral-400">High Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.hardSolved) : "---"}
-                    </span>
+                    <span className="text-white font-bold font-mono">190</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-neutral-400">Medium Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.mediumSolved) : "---"}
-                    </span>
+                    <span className="text-white font-bold font-mono">426</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-neutral-400">Low Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.easySolved) : "---"}
-                    </span>
+                    <span className="text-white font-bold font-mono">920</span>
                   </div>
                 </div>
               </div>
@@ -409,26 +319,20 @@ export default function CommandCenterPage() {
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-xs text-red-500 font-medium">Remaining Missions</span>
+                  <span className="text-xs text-red-500 font-medium">Failed Missions</span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs">
                     <span className="text-neutral-400">High Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.totalHard - leetcodeStats.hardSolved) : "---"}
-                    </span>
+                    <span className="text-white font-bold font-mono">190</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-neutral-400">Medium Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.totalMedium - leetcodeStats.mediumSolved) : "---"}
-                    </span>
+                    <span className="text-white font-bold font-mono">426</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-neutral-400">Low Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.totalEasy - leetcodeStats.easySolved) : "---"}
-                    </span>
+                    <span className="text-white font-bold font-mono">920</span>
                   </div>
                 </div>
               </div>
