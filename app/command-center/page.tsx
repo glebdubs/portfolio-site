@@ -215,38 +215,43 @@ export default function CommandCenterPage() {
               {[
                 {
                   time: "25/06/2025 09:29",
-                  agent: "gh0st_Fire",
-                  action: "completed mission in",
-                  location: "Berlin",
-                  target: "zer0_Nigh",
-                },
-                {
-                  time: "25/06/2025 08:12",
-                  agent: "dr4g0n_V3in",
-                  action: "extracted high-value target in",
-                  location: "Cairo",
-                  target: null,
+                  agent: "Hand-crafted",
+                  action: "this website",
+                  target: "with",
+                  location: "Vercel, typescript and git.",
+                  url:"https://github.com/glebdubs/portfolio-site",
                 },
                 {
                   time: "24/06/2025 22:55",
-                  agent: "sn4ke_Sh4de",
-                  action: "lost communication in",
-                  location: "Havana",
-                  target: null,
+                  agent: "",
+                  action: "Developed a ",
+                  target: "Black-Scholes model Option Pricer",
+                  url: "https://gdu-blackscholes.streamlit.app",
+                  location: "with StreamLit and yFinance.",
                 },
                 {
-                  time: "24/06/2025 21:33",
-                  agent: "ph4nt0m_R4ven",
-                  action: "initiated surveillance in",
-                  location: "Tokyo",
-                  target: null,
+                  time: "01/02/2025 08:12",
+                  agent: "",
+                  action: "Started attending the",
+                  target: "Uni of Adelaide",
+                  location: "doing Software Engineering",
+                  url:"",
                 },
                 {
-                  time: "24/06/2025 19:45",
-                  agent: "v0id_Walk3r",
-                  action: "compromised security in",
-                  location: "Moscow",
-                  target: "d4rk_M4trix",
+                  time: "08/01/2025 21:33",
+                  agent: "Working",
+                  action: "as a ",
+                  target: "tutor",
+                  location: "in Adelaide.",
+                  url:"",
+                },
+                {
+                  time: "11/07/2024 19:45",
+                  agent: "97.10",
+                  action: "ATAR graduating from high school.",
+                  target: "",
+                  location: "",
+                  url:"",
                 },
               ].map((log, index) => (
                 <div
@@ -255,14 +260,16 @@ export default function CommandCenterPage() {
                 >
                   <div className="text-neutral-500 font-mono">{log.time}</div>
                   <div className="text-white">
-                    Agent <span className="text-orange-500 font-mono">{log.agent}</span> {log.action}{" "}
-                    <span className="text-white font-mono">{log.location}</span>
-                    {log.target && (
+                    <a href={log.url} target="_blank" rel="noopener noreferrer">
+                    <span className="text-orange-500 font-mono">{log.agent}</span> {log.action}{" "} 
+                      <span className="text-orange-500 font-mono">{log.target}</span> {log.location}{" "}</a>
+                    {/* <span className="text-white font-mono">{log.location}</span> */}
+                    {/* {log.target && (
                       <span>
                         {" "}
-                        with agent <span className="text-orange-500 font-mono">{log.target}</span>
+                        <span className="text-orange-500 font-mono">{log.target}</span>
                       </span>
-                    )}
+                    )} */}
                   </div>
                 </div>
               ))}
