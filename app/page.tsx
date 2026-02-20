@@ -1,130 +1,92 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { ChevronRight, Monitor, Settings, Shield, Target, Users, Bell, RefreshCw, Menu } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import CommandCenterPage from "./command-center/page"
-import AgentNetworkPage from "./agent-network/page"
-import OperationsPage from "./operations/page"
-import IntelligencePage from "./intelligence/page"
-import SystemsPage from "./systems/page"
+import { useState } from "react";
+import { Monitor, FileText, Bell, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import CommandCenterPage from "./command-center/page";
 
 export default function TacticalDashboard() {
-  const [activeSection, setActiveSection] = useState("overview")
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [activeSection, setActiveSection] = useState("overview");
 
   return (
-    <div className="flex h-screen relative">
-      {/* Collapsed Sidebar Toggle Button - Fixed in top left */}
-      {sidebarCollapsed && (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setSidebarCollapsed(false)}
-          className="fixed top-4 left-4 z-50 text-neutral-400 hover:text-orange-500 bg-neutral-900 border border-neutral-700 hover:bg-neutral-800"
-        >
-          <Menu className="w-4 h-4" />
-        </Button>
-      )}
+    // Added 'overflow-hidden' here to kill the outer scrollbar
+    <div
+      className="flex flex-col h-screen bg-neutral-950 text-neutral-200 overflow-hidden"
+      style={{ zoom: "130%" }}
+    >
+      {/* Header - Stays fixed because of flex-col + h-screen */}
+      <header className="h-20 bg-neutral-900 border-b border-neutral-700 flex items-center justify-between px-8 shrink-0">
+        <div className="flex items-center gap-12">
+          <div>
+            <h1 className="text-orange-500 font-bold text-lg tracking-tighter">
+              TACTICAL OPS{" "}
+              <span className="text-neutral-500 font-mono ml-2 text-xs">
+                v2.1.7
+              </span>
+            </h1>
+          </div>
 
-      {/* Sidebar */}
-      <div
-        className={`${
-          sidebarCollapsed ? "w-0 opacity-0 pointer-events-none" : "w-70 opacity-100"
-        } bg-neutral-900 border-r border-neutral-700 transition-all duration-300 fixed md:relative z-40 h-full overflow-hidden`}
-      >
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <h1 className="text-orange-500 font-bold text-lg tracking-wider">TACTICAL OPS</h1>
-              <p className="text-neutral-500 text-xs">v2.1.7 CLASSIFIED</p>
-            </div>
+          <nav className="flex items-center gap-4">
+            <button
+              onClick={() => setActiveSection("overview")}
+              className={`flex items-center gap-2 px-4 py-2 rounded text-sm font-bold transition-all ${
+                activeSection === "overview"
+                  ? "bg-orange-500/10 text-orange-500 border border-orange-500/50"
+                  : "text-neutral-500 hover:text-neutral-200"
+              }`}
+            >
+              <Monitor className="w-4 h-4" />
+              COMMAND
+            </button>
+
+            <a
+              href="/RESUME.pdf"
+              download="GLEB_DUBININ_RESUME.PDF"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 px-4 py-2 rounded text-sm font-bold text-neutral-500 hover:text-white transition-all hover:bg-neutral-800"
+            >
+              <FileText className="w-4 h-4" />
+              RESUME
+            </a>
+          </nav>
+        </div>
+
+        <div className="flex items-center gap-6">
+          {/* Live Status Indicator */}
+          <div className="hidden md:flex items-center gap-4 text-[11px] font-mono text-neutral-500 border-r border-neutral-700 pr-6">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+              SYSTEM ONLINE
+            </span>
+            <span>
+              UTC: {new Date().getUTCHours()}:{new Date().getUTCMinutes()}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => setSidebarCollapsed(true)}
               className="text-neutral-400 hover:text-orange-500"
             >
-              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Bell className="w-5 h-5" />
             </Button>
-          </div>
-
-          <nav className="space-y-2">
-            {[
-              { id: "overview", icon: Monitor, label: "COMMAND CENTER" },
-              { id: "agents", icon: Users, label: "AGENT NETWORK" },
-              { id: "operations", icon: Target, label: "OPERATIONS" },
-              { id: "intelligence", icon: Shield, label: "INTELLIGENCE" },
-              { id: "systems", icon: Settings, label: "SYSTEMS" },
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setActiveSection(item.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded transition-colors ${
-                  activeSection === item.id
-                    ? "bg-orange-500 text-white"
-                    : "text-neutral-400 hover:text-white hover:bg-neutral-800"
-                }`}
-              >
-                <item.icon className="w-5 h-5 md:w-5 md:h-5 sm:w-6 sm:h-6" />
-                <span className="text-sm font-medium">{item.label}</span>
-              </button>
-            ))}
-          </nav>
-
-          <div className="mt-8 p-4 bg-neutral-800 border border-neutral-700 rounded">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-              <span className="text-xs text-white">SYSTEM ONLINE</span>
-            </div>
-            <div className="text-xs text-neutral-500">
-              <div>UPTIME: 72:14:33</div>
-              <div>AGENTS: 847 ACTIVE</div>
-              <div>MISSIONS: 23 ONGOING</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Overlay */}
-      {!sidebarCollapsed && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden" 
-          onClick={() => setSidebarCollapsed(true)} 
-        />
-      )}
-
-      {/* Main Content */}
-      <div className={`flex-1 flex flex-col transition-all duration-300 ${sidebarCollapsed ? 'ml-0' : 'md:ml-0'}`}>
-        {/* Top Toolbar */}
-        <div className="h-16 bg-neutral-800 border-b border-neutral-700 flex items-center justify-between px-6">
-          <div className="flex items-center gap-4">
-            <div className={`text-sm text-neutral-400 transition-all duration-300 ${
-              sidebarCollapsed ? 'ml-12' : 'ml-0'
-            }`}>
-              TACTICAL COMMAND / <span className="text-orange-500">OVERVIEW</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-xs text-neutral-500">LAST UPDATE: 05/06/2025 20:00 UTC</div>
-            <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
-              <Bell className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="icon" className="text-neutral-400 hover:text-orange-500">
-              <RefreshCw className="w-4 h-4" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-neutral-400 hover:text-orange-500"
+            >
+              <RefreshCw className="w-5 h-5" />
             </Button>
           </div>
         </div>
+      </header>
 
-        {/* Dashboard Content */}
-        <div className="flex-1 overflow-auto">
-          {activeSection === "overview" && <CommandCenterPage />}
-          {activeSection === "agents" && <AgentNetworkPage />}
-          {activeSection === "operations" && <OperationsPage />}
-          {activeSection === "intelligence" && <IntelligencePage />}
-          {activeSection === "systems" && <SystemsPage />}
-        </div>
-      </div>
+      {/* Main Content Area */}
+      <main className="flex-1 overflow-y-auto bg-neutral-950 custom-scrollbar">
+        {activeSection === "overview" && <CommandCenterPage />}
+      </main>
     </div>
-  )
+  );
 }

@@ -128,11 +128,11 @@ export default function CommandCenterPage() {
   return (
     <div
       className="p-6 space-y-6 bg-neutral-950"
-      style={{
-        transform: "scale(1.4)",
-        transformOrigin: "top left",
-        width: "71%",
-      }}
+      // style={{
+      //   transform: "scale(1)",
+      //   transformOrigin: "top left",
+      //   width: "83.33%",
+      // }}
     >
       {/* Main Dashboard Grid */}
 
