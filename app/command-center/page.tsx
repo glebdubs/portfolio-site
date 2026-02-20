@@ -1,109 +1,270 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import DateTimeLabel from "@/components/ui/date-time-label"
-import CursorTraceText from "@/components/ui/hover-text-effect"
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import DateTimeLabel from "@/components/ui/date-time-label";
+import CursorTraceText from "@/components/ui/hover-text-effect";
 
 // Types for the LeetCode API response
 interface LeetCodeStats {
-  status: string
-  message: string
-  totalSolved: number
-  totalQuestions: number
-  easySolved: number
-  totalEasy: number
-  mediumSolved: number
-  totalMedium: number
-  hardSolved: number
-  totalHard: number
-  acceptanceRate: number
-  ranking: number
-  contributionPoints: number
-  reputation: number
-  submissionCalendar: Record<string, number>
+  status: string;
+  message: string;
+  totalSolved: number;
+  totalQuestions: number;
+  easySolved: number;
+  totalEasy: number;
+  mediumSolved: number;
+  totalMedium: number;
+  hardSolved: number;
+  totalHard: number;
+  acceptanceRate: number;
+  ranking: number;
+  contributionPoints: number;
+  reputation: number;
+  submissionCalendar: Record<string, number>;
+}
+
+function SystemStatusPanel() {
+  const [time, setTime] = useState(new Date());
+  const [uptime, setUptime] = useState(0); // seconds since page load
+  const [cpu, setCpu] = useState(12);
+  const [mem, setMem] = useState(34);
+
+  useEffect(() => {
+    const start = Date.now();
+    const tick = setInterval(() => {
+      setTime(new Date());
+      setUptime(Math.floor((Date.now() - start) / 1000));
+      // gently drift the fake readings so they feel alive
+      setCpu((prev) =>
+        Math.min(99, Math.max(5, prev + (Math.random() - 0.48) * 4)),
+      );
+      setMem((prev) =>
+        Math.min(99, Math.max(20, prev + (Math.random() - 0.5) * 2)),
+      );
+    }, 1000);
+    return () => clearInterval(tick);
+  }, []);
+
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const uptimeStr = `${pad(Math.floor(uptime / 3600))}:${pad(Math.floor((uptime % 3600) / 60))}:${pad(uptime % 60)}`;
+
+  const Bar = ({ value }: { value: number }) => {
+    const filled = Math.round(value / 10);
+    return (
+      <span className="font-mono text-xs">
+        <span className="text-orange-500">{"█".repeat(filled)}</span>
+        <span className="text-neutral-700">{"█".repeat(10 - filled)}</span>
+        <span className="text-neutral-400 ml-2">{Math.round(value)}%</span>
+      </span>
+    );
+  };
+
+  return (
+    <div className="font-mono text-xs space-y-3">
+      {/* Clock */}
+      <div className="text-center py-2 border border-neutral-700 rounded">
+        <div className="text-2xl text-white tracking-widest">
+          {pad(time.getHours())}:{pad(time.getMinutes())}:
+          {pad(time.getSeconds())}
+        </div>
+        <div className="text-neutral-500 text-xs mt-1">
+          {time.toLocaleDateString("en-AU", {
+            weekday: "long",
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })}
+        </div>
+      </div>
+
+      {/* Uptime */}
+      <div className="flex justify-between items-center px-1">
+        <span className="text-neutral-500">UPTIME</span>
+        <span className="text-green-400">{uptimeStr}</span>
+      </div>
+
+      {/* CPU */}
+      <div className="space-y-1 px-1">
+        <div className="flex justify-between">
+          <span className="text-neutral-500">CPU</span>
+        </div>
+        <Bar value={cpu} />
+      </div>
+
+      {/* MEM */}
+      <div className="space-y-1 px-1">
+        <div className="flex justify-between">
+          <span className="text-neutral-500">MEM</span>
+        </div>
+        <Bar value={mem} />
+      </div>
+
+      {/* Static info */}
+      <div className="border-t border-neutral-800 pt-2 space-y-1 px-1 text-neutral-600">
+        <div className="flex justify-between">
+          <span>HOST</span>
+          <span className="text-neutral-400">glebdubs.dev</span>
+        </div>
+        <div className="flex justify-between">
+          <span>ENV</span>
+          <span className="text-neutral-400">Next.js / Vercel</span>
+        </div>
+        <div className="flex justify-between">
+          <span>LOCATION</span>
+          <span className="text-neutral-400">Adelaide, AU</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function CommandCenterPage() {
-  // State for LeetCode stats
-  const [leetcodeStats, setLeetcodeStats] = useState<LeetCodeStats | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  // Your LeetCode username - change this to your actual username
-  const LEETCODE_USERNAME = "glebdubs" // Change this to your LeetCode username
-
-  // Function to fetch LeetCode stats
-  const fetchLeetCodeStats = async (username: string) => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      
-      const response = await fetch(`https://leetcode-stats-api.herokuapp.com/${username}`)
-      const data = await response.json()
-      
-      if (data.status === 'success') {
-        setLeetcodeStats(data)
-      } else {
-        setError(data.message || 'Failed to fetch LeetCode stats')
-      }
-    } catch (err) {
-      setError('Network error: Unable to fetch LeetCode stats')
-      console.error('LeetCode API Error:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  // Fetch stats on component mount
-  useEffect(() => {
-    fetchLeetCodeStats(LEETCODE_USERNAME)
-  }, [])
-
   // Helper function to format numbers with hacker-style padding
   const formatHackerNumber = (num: number): string => {
-    return num.toString().padStart(3, '0')
-  }
+    return num.toString().padStart(3, "0");
+  };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-neutral-950">
       {/* Main Dashboard Grid */}
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Mission Activity Chart */}
+        {/* Capability Overview */}
+        <Card className="lg:col-span-8 bg-neutral-900 border-neutral-700">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-l font-large text-neutral-200 tracking-wider">
+              GLEB DUBININ
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {/* Bio blurb */}
+            <p className="text-xs text-neutral-400 leading-relaxed border-l-2 border-orange-500 pl-3">
+              Software engineer focused on{" "}
+              <span className="text-white font-mono">
+                high-performance systems
+              </span>{" "}
+              and writing code that is fast, lean, and close to the metal.
+              Particular interest in{" "}
+              <span className="text-orange-500 font-mono">
+                graphics programming
+              </span>{" "}
+              and <span className="text-orange-500 font-mono">OS design</span> —
+              areas where every byte and every cycle counts.
+            </p>
+
+            {/* Skills grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-neutral-800 rounded p-3 hover:bg-neutral-700 transition-colors">
+                <div className="text-xs text-orange-500 font-mono font-bold mb-1">
+                  C++
+                </div>
+                <div className="text-xs text-neutral-500 mb-1">
+                  Primary Language
+                </div>
+                <div className="text-xs text-neutral-400">
+                  Memory management, template metaprogramming, SIMD, zero-cost
+                  abstractions
+                </div>
+              </div>
+
+              <div className="bg-neutral-800 rounded p-3 hover:bg-neutral-700 transition-colors">
+                <div className="text-xs text-orange-500 font-mono font-bold mb-1">
+                  GRAPHICS PROGRAMMING
+                </div>
+                <div className="text-xs text-neutral-500 mb-1">
+                  Rendering Systems
+                </div>
+                <div className="text-xs text-neutral-400">
+                  3D renderers, rasterisation pipelines, real-time rendering,
+                  shader logic
+                </div>
+              </div>
+
+              <div className="bg-neutral-800 rounded p-3 hover:bg-neutral-700 transition-colors">
+                <div className="text-xs text-orange-500 font-mono font-bold mb-1">
+                  OS & SYSTEMS
+                </div>
+                <div className="text-xs text-neutral-500 mb-1">
+                  Low-Level Design
+                </div>
+                <div className="text-xs text-neutral-400">
+                  Kernel concepts, memory models, process scheduling, bare-metal
+                  environments
+                </div>
+              </div>
+
+              <div className="bg-neutral-800 rounded p-3 hover:bg-neutral-700 transition-colors">
+                <div className="text-xs text-orange-500 font-mono font-bold mb-1">
+                  PERFORMANCE ENGINEERING
+                </div>
+                <div className="text-xs text-neutral-500 mb-1">
+                  Optimisation
+                </div>
+                <div className="text-xs text-neutral-400">
+                  Cache efficiency, low memory footprints, profiling,
+                  algorithmic complexity
+                </div>
+              </div>
+
+              <div className="bg-neutral-800 rounded p-3 hover:bg-neutral-700 transition-colors">
+                <div className="text-xs text-orange-500 font-mono font-bold mb-1">
+                  PYTHON
+                </div>
+                <div className="text-xs text-neutral-500 mb-1">
+                  Scripting & Prototyping
+                </div>
+                <div className="text-xs text-neutral-400">
+                  Data analysis, financial modelling, automation, rapid
+                  experimentation
+                </div>
+              </div>
+
+              <div className="bg-neutral-800 rounded p-3 hover:bg-neutral-700 transition-colors">
+                <div className="text-xs text-orange-500 font-mono font-bold mb-1">
+                  TYPESCRIPT / WEB
+                </div>
+                <div className="text-xs text-neutral-500 mb-1">Frontend</div>
+                <div className="text-xs text-neutral-400">
+                  React, Next.js, Tailwind — building interfaces when the
+                  situation calls for it
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* LeetCode Stats Overview */}
-        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
+        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700 max-h-[500px]">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
                 LEETCODE STATS
               </CardTitle>
-              {isLoading && (
-                <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-              )}
-              {error && (
-                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-              )}
-              {!isLoading && !error && leetcodeStats && (
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              )}
+              {<div className="w-2 h-2 bg-green-500 rounded-full"></div>}
             </div>
+            <CardTitle className="text-sm font-small text-neutral-500 tracking-wider">
+              AS OF 20-02-26
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4 mb-4">
               <div className="text-center">
                 <div className="text-2xl font-bold text-white font-mono">
-                  {isLoading ? "---" : error ? "ERR" : formatHackerNumber(leetcodeStats?.totalSolved || 0)}
+                  {"241"}
                 </div>
                 <div className="text-xs text-neutral-500">Problems Solved</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-white font-mono">
-                  {isLoading ? "---" : error ? "ERR" : `${leetcodeStats?.acceptanceRate?.toFixed(1) || "0.0"}%`}
+                  {"59.4%"}
                 </div>
                 <div className="text-xs text-neutral-500">Acceptance Rate</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-white font-mono">
-                  {isLoading ? "---" : error ? "ERR" : leetcodeStats?.contributionPoints?.toLocaleString() || "0"}
+                  {"727"}
                 </div>
                 <div className="text-xs text-neutral-500">Contribution Pts</div>
               </div>
@@ -111,15 +272,12 @@ export default function CommandCenterPage() {
 
             {/* Global Rank - Separate Row */}
             <div className="border-l-2 border-orange-500 pl-3 bg-neutral-800 p-3 rounded mb-4">
-              <div className="text-xs text-neutral-300 font-mono mb-1">GLOBAL RANKING</div>
-              <div className="text-xl text-white font-mono">
-                {isLoading ? "Loading..." : error ? "Connection Failed" : `#${leetcodeStats?.ranking?.toLocaleString() || "0"}`}
+              <div className="text-xs text-neutral-300 font-mono mb-1">
+                GLOBAL RANKING
               </div>
+              <div className="text-xl text-white font-mono">{"583,146"}</div>
               <div className="text-xs text-neutral-500">
-                {!isLoading && !error && leetcodeStats && leetcodeStats.ranking > 0 ? 
-                  `Top ${((leetcodeStats.ranking / 4000000) * 100).toFixed(2)}% worldwide` : 
-                  "Rank unavailable"
-                }
+                {"Top 22.92%, or something like that"}
               </div>
             </div>
 
@@ -128,23 +286,18 @@ export default function CommandCenterPage() {
               <div className="text-xs text-neutral-300 font-medium tracking-wider mb-2">
                 DIFFICULTY BREAKDOWN
               </div>
-              
+
               {/* Easy Problems */}
               <div className="flex items-center justify-between p-2 bg-neutral-800 rounded hover:bg-neutral-700 transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 rounded-full bg-green-500"></div>
                   <div>
                     <div className="text-xs text-white font-mono">EASY</div>
-                    <div className="text-xs text-neutral-500">
-                      {isLoading ? "Loading..." : error ? "Error" : `${leetcodeStats?.easySolved || 0}/${leetcodeStats?.totalEasy || 0}`}
-                    </div>
+                    <div className="text-xs text-neutral-500">{"84 / 927"}</div>
                   </div>
                 </div>
                 <div className="text-sm font-mono text-white">
-                  {!isLoading && !error && leetcodeStats ? 
-                    `${((leetcodeStats.easySolved / leetcodeStats.totalEasy) * 100).toFixed(0)}%` : 
-                    "-%"
-                  }
+                  {`${((84 / 927) * 100).toFixed(0)}%`}
                 </div>
               </div>
 
@@ -155,15 +308,12 @@ export default function CommandCenterPage() {
                   <div>
                     <div className="text-xs text-white font-mono">MEDIUM</div>
                     <div className="text-xs text-neutral-500">
-                      {isLoading ? "Loading..." : error ? "Error" : `${leetcodeStats?.mediumSolved || 0}/${leetcodeStats?.totalMedium || 0}`}
+                      {"114 / 2010"}
                     </div>
                   </div>
                 </div>
                 <div className="text-sm font-mono text-white">
-                  {!isLoading && !error && leetcodeStats ? 
-                    `${((leetcodeStats.mediumSolved / leetcodeStats.totalMedium) * 100).toFixed(0)}%` : 
-                    "-%"
-                  }
+                  {`${((114 / 2010) * 100).toFixed(0)}%`}
                 </div>
               </div>
 
@@ -173,276 +323,319 @@ export default function CommandCenterPage() {
                   <div className="w-2 h-2 rounded-full bg-red-500"></div>
                   <div>
                     <div className="text-xs text-white font-mono">HARD</div>
-                    <div className="text-xs text-neutral-500">
-                      {isLoading ? "Loading..." : error ? "Error" : `${leetcodeStats?.hardSolved || 0}/${leetcodeStats?.totalHard || 0}`}
-                    </div>
+                    <div className="text-xs text-neutral-500">{"43 / 909"}</div>
                   </div>
                 </div>
                 <div className="text-sm font-mono text-white">
-                  {!isLoading && !error && leetcodeStats ? 
-                    `${((leetcodeStats.hardSolved / leetcodeStats.totalHard) * 100).toFixed(0)}%` : 
-                    "-%"
-                  }
+                  {`${((43 / 909) * 100).toFixed(0)}%`}
                 </div>
               </div>
             </div>
-
-
-
-            {/* Error Display */}
-            {error && (
-              <div className="border-l-2 border-red-500 pl-3 bg-red-900/20 p-2 rounded">
-                <div className="text-xs text-red-400 font-mono">SYSTEM ERROR</div>
-                <div className="text-xs text-red-300">{error}</div>
-                <button 
-                  onClick={() => fetchLeetCodeStats(LEETCODE_USERNAME)}
-                  className="text-xs text-orange-500 hover:text-orange-400 mt-1 font-mono"
-                >
-                  [RETRY_CONNECTION]
-                </button>
-              </div>
-            )}
           </CardContent>
         </Card>
-
         {/* Activity Log */}
-        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
+        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700 max-h-[500px] overflow-y-auto">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">ACTIVITY LOG</CardTitle>
+            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+              ACTIVITY LOG
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
-              {[
-                {
-                  time: "25/06/2025 09:29",
-                  agent: "Hand-crafted",
-                  action: "this website",
-                  target: "with",
-                  location: "Vercel, typescript and git.",
-                  url:"https://github.com/glebdubs/portfolio-site",
-                },
-                {
-                  time: "24/06/2025 22:55",
-                  agent: "",
-                  action: "Developed a ",
-                  target: "Black-Scholes model Option Pricer",
-                  url: "https://gdu-blackscholes.streamlit.app",
-                  location: "with StreamLit and yFinance.",
-                },
-                {
-                  time: "01/02/2025 08:12",
-                  agent: "",
-                  action: "Started attending the",
-                  target: "Uni of Adelaide",
-                  location: "doing Software Engineering",
-                  url:"",
-                },
-                {
-                  time: "08/01/2025 21:33",
-                  agent: "Working",
-                  action: "as a ",
-                  target: "tutor",
-                  location: "in Adelaide.",
-                  url:"",
-                },
-                {
-                  time: "11/07/2024 19:45",
-                  agent: "97.10",
-                  action: "ATAR graduating from high school.",
-                  target: "",
-                  location: "",
-                  url:"",
-                },
-              ].map((log, index) => (
-                <div
-                  key={index}
-                  className="text-xs border-l-2 border-orange-500 pl-3 hover:bg-neutral-800 p-2 rounded transition-colors"
-                >
-                  <div className="text-neutral-500 font-mono">{log.time}</div>
-                  <div className="text-white">
-                    <a href={log.url} target="_blank" rel="noopener noreferrer">
-                    <span className="text-orange-500 font-mono">{log.agent}</span> {log.action}{" "} 
-                      <span className="text-orange-500 font-mono">{log.target}</span> {log.location}{" "}</a>
-                    {/* <span className="text-white font-mono">{log.location}</span> */}
-                    {/* {log.target && (
-                      <span>
-                        {" "}
-                        <span className="text-orange-500 font-mono">{log.target}</span>
-                      </span>
-                    )} */}
-                  </div>
+            <div className="space-y-3 overflow-y-auto">
+              {/* 3d renderer */}
+              <div className="text-xs border-l-2 border-orange-500 pl-3 hover:bg-neutral-800 p-2 rounded transition-colors">
+                <div className="text-neutral-500 font-mono">
+                  25/12/2025 09:29
                 </div>
-              ))}
+                <div className="text-white">
+                  <a
+                    href="https://github.com/ShashwatSingh67/oop-project/tree/TradingSysController"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Used Apple's{" "}
+                    <span className="text-orange-500 font-mono">Metal API</span>{" "}
+                    for a 3D rendered{" "}
+                    <span className="text-orange-500 font-mono">
+                      Boid Simulation
+                    </span>
+                    .
+                  </a>
+                </div>
+              </div>
+
+              {/* secure shell */}
+              <div className="text-xs border-l-2 border-orange-500 pl-3 hover:bg-neutral-800 p-2 rounded transition-colors">
+                <div className="text-neutral-500 font-mono">
+                  25/12/2025 09:29
+                </div>
+                <div className="text-white">
+                  <a
+                    href="https://github.com/ShashwatSingh67/oop-project/tree/TradingSysController"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Created an asymetrically encrypted{" "}
+                    <span className="text-orange-500 font-mono">
+                      Custom Secure Shell
+                    </span>{" "}
+                    using C++ and OpenSSL.
+                  </a>
+                </div>
+              </div>
+
+              {/* stock exch */}
+              <div className="text-xs border-l-2 border-orange-500 pl-3 hover:bg-neutral-800 p-2 rounded transition-colors">
+                <div className="text-neutral-500 font-mono">
+                  27/11/2025 09:29
+                </div>
+                <div className="text-white">
+                  <a
+                    href="https://github.com/ShashwatSingh67/oop-project/tree/TradingSysController"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Developed a{" "}
+                    <span className="text-orange-500 font-mono">
+                      Paper Stock Exchange
+                    </span>{" "}
+                    in a group project using C++ and Qt.
+                  </a>
+                </div>
+              </div>
+
+              {/* Hand-crafted this website */}
+              <div className="text-xs border-l-2 border-orange-500 pl-3 hover:bg-neutral-800 p-2 rounded transition-colors">
+                <div className="text-neutral-500 font-mono">
+                  25/06/2025 09:29
+                </div>
+                <div className="text-white">
+                  <a
+                    href="https://github.com/glebdubs/portfolio-site"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <span className="text-orange-500 font-mono">
+                      Hand-crafted this website
+                    </span>{" "}
+                    with Vercel, typescript and git.
+                  </a>
+                </div>
+              </div>
+
+              {/* Black-Scholes Option Pricer */}
+              <div className="text-xs border-l-2 border-orange-500 pl-3 hover:bg-neutral-800 p-2 rounded transition-colors">
+                <div className="text-neutral-500 font-mono">
+                  24/06/2025 22:55
+                </div>
+                <div className="text-white">
+                  Developed a{" "}
+                  <a
+                    href="https://gdu-blackscholes.streamlit.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-orange-500 font-mono hover:underline"
+                  >
+                    Black-Scholes model Option Pricer
+                  </a>{" "}
+                  with StreamLit and yFinance.
+                </div>
+              </div>
+
+              {/* Uni of Adelaide */}
+              <div className="text-xs border-l-2 border-orange-500 pl-3 hover:bg-neutral-800 p-2 rounded transition-colors">
+                <div className="text-neutral-500 font-mono">
+                  01/02/2025 08:12
+                </div>
+                <div className="text-white">
+                  Started attending the{" "}
+                  <span className="text-orange-500 font-mono">
+                    Uni of Adelaide
+                  </span>{" "}
+                  doing Software Engineering
+                </div>
+              </div>
+
+              {/* Tutor */}
+              <div className="text-xs border-l-2 border-orange-500 pl-3 hover:bg-neutral-800 p-2 rounded transition-colors">
+                <div className="text-neutral-500 font-mono">
+                  08/01/2025 21:33
+                </div>
+                <div className="text-white">
+                  Working as a{" "}
+                  <span className="text-orange-500 font-mono">tutor</span> in
+                  Adelaide.
+                </div>
+              </div>
+
+              {/* ATAR */}
+              <div className="text-xs border-l-2 border-orange-500 pl-3 hover:bg-neutral-800 p-2 rounded transition-colors">
+                <div className="text-neutral-500 font-mono">
+                  11/07/2024 19:45
+                </div>
+                <div className="text-white">
+                  <span className="text-orange-500 font-mono">97.10</span> ATAR
+                  graduating from high school.
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         {/* Encrypted Chat Activity */}
-        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
-            <CardHeader className="pb-3">
-              <div className="inline-flex gap-2">
-                <CardTitle className="text-sm font-medium text-neutral-700 tracking-wider">
-                  UN
-                </CardTitle>
-                <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
-                  ENCRYPTED SOCIALS
-                </CardTitle>
-              </div>
-            </CardHeader>
+        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700 max-h-[500px]">
+          <CardHeader className="pb-3">
+            <div className="inline-flex gap-2">
+              <CardTitle className="text-sm font-medium text-neutral-700 tracking-wider">
+                UN
+              </CardTitle>
+              <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+                ENCRYPTED SOCIALS
+              </CardTitle>
+            </div>
+          </CardHeader>
           <CardContent className="flex flex-col items-center">
             {/* Wireframe Sphere */}
-            <div className="relative w-32 h-32 mb-4">
-              <div className="absolute inset-0 border-2 border-white rounded-full opacity-60 animate-pulse"></div>
-              <div className="absolute inset-2 border border-white rounded-full opacity-40"></div>
-              <div className="absolute inset-4 border border-white rounded-full opacity-20"></div>
-              {/* Grid lines */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-full h-px bg-white opacity-30"></div>
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-px h-full bg-white opacity-30"></div>
-              </div>
+            {/* Concentric Circles Banner */}
+            <div className="relative w-full h-20 mb-4 overflow-hidden flex items-center justify-center">
+              {[265, 240, 215, 190, 165, 140, 115, 90, 65, 40, 20, 7].map(
+                (size, i) => (
+                  <div
+                    key={i}
+                    className="absolute rounded-full border border-neutral-400"
+                    style={{
+                      width: `${size * 2}px`,
+                      height: `${size * 2}px`,
+                      opacity: 0.15 + i * 0.1,
+                    }}
+                  />
+                ),
+              )}
+              {/* centre dot */}
+              {/*<div className="absolute w-2 h-2 rounded-full bg-neutral-300 opacity-80" />*/}
             </div>
 
             <div className="text-base text-neutral-500 space-y-1 w-full font-mono">
               <div className="flex justify-between">
                 <span>
-                <DateTimeLabel/>
+                  <DateTimeLabel />
                 </span>
               </div>
-              <a href="https://github.com/glebdubs" target="_blank" rel="noopener noreferrer">
-                <CursorTraceText className="block" text="GITHUB   : >> @glebdubs <<"/>
-              </a>
-              <br/>
-              <a href="https://leetcode.com/u/glebdubs/" target="_blank" rel="noopener noreferrer">
-                <CursorTraceText className="block text-white" text="LEETCODE : // @glebdubs"/>
-              </a>
-              <br/>
-              <a href="https://www.instagram.com/gleb.dubs/" target="_blank" rel="noopener noreferrer">
-                <CursorTraceText className="block text-orange-500" text="INSTA     : $$ @gleb.dubs"/>
-              </a>
-              
-              <a target="_blank" rel="noopener noreferrer">
-                <CursorTraceText className="block text-neutral-500" text="DISCORD  : ### @g.du"/>
-              </a>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Mission Activity Chart */}
-        <Card className="lg:col-span-8 bg-neutral-900 border-neutral-700">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
-              MISSION ACTIVITY OVERVIEW
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-48 relative">
-              {/* Chart Grid */}
-              <div className="absolute inset-0 grid grid-cols-8 grid-rows-6 opacity-20">
-                {Array.from({ length: 48 }).map((_, i) => (
-                  <div key={i} className="border border-neutral-700"></div>
-                ))}
-              </div>
-
-              {/* Chart Line */}
-              <svg className="absolute inset-0 w-full h-full">
-                <polyline
-                  points="0,120 50,100 100,110 150,90 200,95 250,85 300,100 350,80"
-                  fill="none"
-                  stroke="#f97316"
-                  strokeWidth="2"
+              <CursorTraceText className="block" text="-------------------" />
+              <br />
+              <a
+                href="RESUME.PDF"
+                download="GLEB_DUBININ_RESUME.PDF"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <CursorTraceText
+                  className="block"
+                  text="RESUME   : click here"
                 />
-                <polyline
-                  points="0,140 50,135 100,130 150,125 200,130 250,135 300,125 350,120"
-                  fill="none"
-                  stroke="#ffffff"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
+              </a>
+              <br />
+              <CursorTraceText className="block" text="-------------------" />
+              <br />
+              <a
+                href="https://github.com/glebdubs"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <CursorTraceText
+                  className="block"
+                  text="GITHUB   : @glebdubs"
                 />
-              </svg>
-
-              {/* Y-axis labels */}
-              <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs text-neutral-500 -ml-5 font-mono">
-                <span>500</span>
-                <span>400</span>
-                <span>300</span>
-                <span>200</span>
-              </div>
-
-              {/* X-axis labels */}
-              <div className="absolute bottom-0 left-0 w-full flex justify-between text-xs text-neutral-500 -mb-6 font-mono">
-                <span>Jan 28, 2025</span>
-                <span>Feb 28, 2025</span>
-              </div>
+              </a>
+              <br />
+              <CursorTraceText className="block" text="-------------------" />
+              <br />
+              <a
+                href="https://leetcode.com/u/glebdubs/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <CursorTraceText
+                  className="block text-white"
+                  text="LEETCODE : @glebdubs"
+                />
+              </a>
+              <br />
+              <CursorTraceText className="block" text="-------------------" />
+              <br />
+              <a
+                href="https://www.linkedin.com/in/gleb-dubinin/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <CursorTraceText
+                  className="block text-orange-500"
+                  text="LINKEDIN : /gleb-dubinin/"
+                />
+              </a>
+              <br />
+              <CursorTraceText className="block" text="-------------------" />
+              <br />
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="mailto:glebadubinin@gmail.com"
+              >
+                <CursorTraceText
+                  className="block text-neutral-500"
+                  text="EMAIL  : glebadubinin@gmail.com"
+                />
+              </a>
             </div>
           </CardContent>
         </Card>
 
         {/* Mission Information - Updated with LeetCode Data */}
-        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">MISSION INFORMATION</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                  <span className="text-xs text-white font-medium">Successful Missions</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-neutral-400">High Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.hardSolved) : "---"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-neutral-400">Medium Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.mediumSolved) : "---"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-neutral-400">Low Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.easySolved) : "---"}
-                    </span>
-                  </div>
-                </div>
+        <Card className="lg:col-span-4 bg-neutral-900 border-neutral-700 max-h-[500px] overflow-y-auto">
+          <CardHeader className="pb-3 max-h-[500px]">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+                SYSTEM STATUS
+              </CardTitle>
+              <div className="flex gap-1 items-center">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-green-500 font-mono">ONLINE</span>
               </div>
-
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-xs text-red-500 font-medium">Remaining Missions</span>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-neutral-400">High Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.totalHard - leetcodeStats.hardSolved) : "---"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-neutral-400">Medium Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.totalMedium - leetcodeStats.mediumSolved) : "---"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-neutral-400">Low Risk Mission</span>
-                    <span className="text-white font-bold font-mono">
-                      {!isLoading && !error && leetcodeStats ? formatHackerNumber(leetcodeStats.totalEasy - leetcodeStats.easySolved) : "---"}
-                    </span>
-                  </div>
-                </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <SystemStatusPanel />
+          </CardContent>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-medium text-neutral-300 tracking-wider">
+              OFFLINE PROFILE
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {/* add your interests here as log-style entries */}
+            <div className="text-xs border-l-2 border-orange-500 pl-3 py-1">
+              <div className="text-orange-500 font-mono mb-0.5">
+                CURRENTLY READING
+              </div>
+              <div className="text-neutral-300">Red Rising - Pierce Brown</div>
+            </div>
+            <div className="text-xs border-l-2 border-neutral-600 pl-3 py-1">
+              <div className="text-orange-500 font-mono mb-0.5">GYM</div>
+              <div className="text-neutral-300">
+                — 110 Bench, 130 Squat, what is a deadlift?
+              </div>
+            </div>
+            <div className="text-xs border-l-2 border-neutral-600 pl-3 py-1">
+              <div className="text-orange-500 font-mono mb-0.5">
+                LISTENING TO
+              </div>
+              <div className="text-neutral-300">
+                — KANYE, SLEEP TOKEN, MICHAEL JACKSON
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
     </div>
-  )
+  );
 }

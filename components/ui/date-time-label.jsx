@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import CursorTraceText from "@/components/ui/hover-text-effect"
+import React, { useState, useEffect } from "react";
+import CursorTraceText from "@/components/ui/hover-text-effect";
 
 const DateTimeLabel = () => {
-  const [currentTime, setCurrentTime] = useState('');
+  const [currentTime, setCurrentTime] = useState("");
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      const formattedTime = now.toISOString().replace('T', ' ').split('.')[0]; // Formats as YYYY-MM-DD HH:MM:SS
+      const formattedTime = now.toISOString().replace("T", " ").split(".")[0]; // Formats as YYYY-MM-DD HH:MM:SS
       setCurrentTime(formattedTime);
     };
 
@@ -19,7 +19,9 @@ const DateTimeLabel = () => {
 
   return (
     <div>
-      <span className="font-mono text-lg text-orange-700">## {currentTime} ACST ##</span>
+      <span className="font-mono text-lg text-orange-700">
+        {currentTime} ACST
+      </span>
     </div>
   );
 };
