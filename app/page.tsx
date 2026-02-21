@@ -43,7 +43,7 @@ export default function TacticalDashboard() {
             </button>
 
             <a
-              href="RESUME.pdf"
+              href="RESUME.PDF"
               download="GLEB_DUBININ_RESUME.PDF"
               target="_blank"
               rel="noopener noreferrer"
