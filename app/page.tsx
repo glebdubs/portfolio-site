@@ -18,8 +18,11 @@ export default function TacticalDashboard() {
       <header className="h-20 bg-neutral-900 border-b border-neutral-700 flex items-center justify-between px-8 shrink-0">
         <div className="flex items-center gap-12">
           <div>
-            <h1 className="text-orange-500 font-bold text-lg tracking-tighter">
-              TACTICAL OPS{" "}
+            <h1 className="text-neutral-500 font-bold text-lg tracking-tighter margin-bottom:0">
+              HTTPS://
+            </h1>
+            <h1 className="text-orange-500 font-bold text-lg tracking-tighter margin-bottom:0">
+              GDU.VERCEL.APP{" "}
               <span className="text-neutral-500 font-mono ml-2 text-xs">
                 v2.1.7
               </span>
@@ -40,7 +43,7 @@ export default function TacticalDashboard() {
             </button>
 
             <a
-              href="/RESUME.pdf"
+              href="RESUME.pdf"
               download="GLEB_DUBININ_RESUME.PDF"
               target="_blank"
               rel="noopener noreferrer"
